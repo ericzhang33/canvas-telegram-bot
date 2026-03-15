@@ -37,7 +37,7 @@ MS_CLIENT_ID = os.getenv("MS_CLIENT_ID")
 MS_CLIENT_SECRET = os.getenv("MS_CLIENT_SECRET")
 MS_TENANT_ID = os.getenv("MS_TENANT_ID")
 
-DAYS_AHEAD = 7
+DAYS_AHEAD = 14
 DB_FILE = "bot_data.db"
 
 # Set your timezone
