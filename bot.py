@@ -89,7 +89,7 @@ def send_telegram_message(message):
     try:
         response = requests.post(url, json=payload)
         response.raise_for_status()
-        print(f"✓ Message sent successfully at {datetime.now()}")
+        print(f"✓ Message sent successfully at {datetime.now(LOCAL_TZ)}")
         return True
     except Exception as e:
         print(f"✗ Error sending message: {e}")
@@ -153,7 +153,7 @@ def get_outlook_events():
                 'name': event['subject'],
                 'start_time': start_time,
                 'location': event.get('location', {}).get('displayName', 'No location'),
-                'days_until': (start_time.date() - datetime.now().date()).days
+                'days_until': (start_time.date() - datetime.now(LOCAL_TZ).date()).days
             })
         
         print(f"✓ Fetched {len(calendar_events)} Outlook events")
@@ -182,7 +182,7 @@ def get_upcoming_assignments():
                         due_date_utc = datetime.strptime(assignment.due_at, "%Y-%m-%dT%H:%M:%SZ")
                         due_date_utc = due_date_utc.replace(tzinfo=timezone.utc)
                         due_date = due_date_utc.astimezone(LOCAL_TZ)
-                        days_until_due = (due_date - datetime.now()).days
+                        days_until_due = (due_date - datetime.now(LOCAL_TZ)).days
                         
                         if -1 <= days_until_due <= DAYS_AHEAD:
                             all_assignments.append({
@@ -211,7 +211,7 @@ def get_custom_events():
     c = conn.cursor()
     
     events = []
-    now = datetime.now()
+    now = datetime.now(LOCAL_TZ)
     end_date = now + timedelta(days=DAYS_AHEAD)
     
     c.execute("SELECT id, name, due_date, recurring, frequency FROM custom_events")
@@ -240,7 +240,7 @@ def get_custom_events():
 def format_full_agenda(assignments, calendar_events, custom_events):
     """Format complete agenda with all sources"""
     message = f"📚 <b>Your Complete Agenda</b>\n"
-    message += f"📅 {datetime.now().strftime('%A, %B %d, %Y')}\n"
+    message += f"📅 {datetime.now(LOCAL_TZ).strftime('%A, %B %d, %Y')}\n"
     message += "─" * 30 + "\n\n"
     
     # Combine all items and sort by date
@@ -320,7 +320,7 @@ def format_full_agenda(assignments, calendar_events, custom_events):
 def send_daily_agenda():
     """Main function to fetch and send daily agenda"""
     print(f"\n{'='*50}")
-    print(f"Running daily agenda at {datetime.now()}")
+    print(f"Running daily agenda at {datetime.now(LOCAL_TZ)}")
     print(f"{'='*50}\n")
     
     # Fetch all data
@@ -339,7 +339,7 @@ def send_daily_agenda():
 
 def check_day_before_reminders():
     """Check for assignments due tomorrow and send reminders"""
-    print(f"Checking for day-before reminders at {datetime.now()}")
+    print(f"Checking for day-before reminders at {datetime.now(LOCAL_TZ)}")
     
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
@@ -463,10 +463,10 @@ def handle_remind_command(text):
     
     # Calculate remind time
     if "hour" in unit.lower():
-        remind_at = datetime.now() + timedelta(hours=number)
+        remind_at = datetime.now(LOCAL_TZ) + timedelta(hours=number)
         time_desc = f"{number} hour(s)"
     else:
-        remind_at = datetime.now() + timedelta(days=number)
+        remind_at = datetime.now(LOCAL_TZ) + timedelta(days=number)
         time_desc = f"{number} day(s)"
     
     # Store reminder in database
@@ -537,7 +537,7 @@ def check_custom_reminders():
     conn = sqlite3.connect(DB_FILE)
     c = conn.cursor()
     
-    now = datetime.now()
+    now = datetime.now(LOCAL_TZ)
     
     # Get pending reminders
     c.execute("SELECT id, remind_at, message FROM reminders WHERE remind_at <= ?", (now.isoformat(),))
@@ -570,7 +570,7 @@ def test_connection():
     
     # Test Telegram
     try:
-        test_msg = f"🤖 Bot connected!\n\nTesting at {datetime.now().strftime('%I:%M %p on %B %d, %Y')}"
+        test_msg = f"🤖 Bot connected!\n\nTesting at {datetime.now(LOCAL_TZ).strftime('%I:%M %p on %B %d, %Y')}"
         if send_telegram_message(test_msg):
             print("✓ Telegram connected")
         else:
