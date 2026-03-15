@@ -13,7 +13,8 @@ import os
 import sys
 import sqlite3
 import json
-from datetime import datetime, timedelta
+from datetime import datetime, timedelta, timezone
+import pytz
 from canvasapi import Canvas
 import requests
 from dotenv import load_dotenv
@@ -38,6 +39,9 @@ MS_TENANT_ID = os.getenv("MS_TENANT_ID")
 
 DAYS_AHEAD = 7
 DB_FILE = "bot_data.db"
+
+# Set your timezone
+LOCAL_TZ = pytz.timezone('America/Toronto')
 
 # Initialize database
 def init_db():
@@ -615,7 +619,7 @@ def main():
         return
     
     # Schedule tasks
-    schedule.every().day.at("08:00").do(send_daily_agenda)  # Morning agenda
+    schedule.every().day.at("11:00").do(send_daily_agenda)  # Morning agenda
     schedule.every().day.at("20:00").do(check_day_before_reminders)  # Evening reminder check
     schedule.every(5).minutes.do(check_custom_reminders)  # Check custom reminders
     
