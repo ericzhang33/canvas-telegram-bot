@@ -220,9 +220,15 @@ def get_custom_events():
     for row in rows:
         event_id, name, due_date_str, recurring, frequency = row
         due_date = datetime.fromisoformat(due_date_str)
+        if due_date.tzinfo is None:
+            # Make it timezone-aware (Eastern Time)
+            due_date = LOCAL_TZ.localize(due_date)
         
         # Check if event is within range
-        if now <= due_date <= end_date:
+        now_aware = now if now.tzinfo else LOCAL_TZ.localize(now)
+        end_date_aware = end_date if end_date.tzinfo else LOCAL_TZ.localize(end_date)
+
+        if now_aware <= due_date <= end_date_aware:
             days_until = (due_date - now).days
             events.append({
                 'id': f"custom_{event_id}",
