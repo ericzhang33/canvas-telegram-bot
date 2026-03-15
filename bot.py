@@ -179,7 +179,9 @@ def get_upcoming_assignments():
                 assignments = course.get_assignments()
                 for assignment in assignments:
                     if hasattr(assignment, 'due_at') and assignment.due_at:
-                        due_date = datetime.strptime(assignment.due_at, "%Y-%m-%dT%H:%M:%SZ")
+                        due_date_utc = datetime.strptime(assignment.due_at, "%Y-%m-%dT%H:%M:%SZ")
+                        due_date_utc = due_date_utc.replace(tzinfo=timezone.utc)
+                        due_date = due_date_utc.astimezone(LOCAL_TZ)
                         days_until_due = (due_date - datetime.now()).days
                         
                         if 0 <= days_until_due <= DAYS_AHEAD:
@@ -503,7 +505,9 @@ def handle_add_command(text):
         
         # Parse due date
         try:
-            due_date = datetime.strptime(due_date_str, "%Y-%m-%d")
+            due_date_utc = datetime.strptime(assignment.due_at, "%Y-%m-%dT%H:%M:%SZ")
+            due_date_utc = due_date_utc.replace(tzinfo=timezone.utc)
+            due_date = due_date_utc.astimezone(LOCAL_TZ)
         except ValueError:
             send_telegram_message("❌ Invalid date format. Use YYYY-MM-DD (e.g., 2026-03-20)")
             return
