@@ -184,7 +184,7 @@ def get_upcoming_assignments():
                         due_date = due_date_utc.astimezone(LOCAL_TZ)
                         days_until_due = (due_date - datetime.now()).days
                         
-                        if 0 <= days_until_due <= DAYS_AHEAD:
+                        if -1 <= days_until_due <= DAYS_AHEAD:
                             all_assignments.append({
                                 'id': f"canvas_{assignment.id}",
                                 'course': course.name,
